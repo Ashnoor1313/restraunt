@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@theme {
+  --font-heading: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
+
+  --color-theme-bg: var(--theme-bg);
+  --color-theme-text: var(--theme-text);
+  --color-theme-text-muted: var(--theme-text-muted);
+  --color-theme-accent: var(--theme-accent);
+  --color-theme-accent-hover: var(--theme-accent-hover);
+  --color-theme-card-bg: var(--theme-card-bg);
+  --color-theme-card-border: var(--theme-card-border);
+  --color-theme-gold: #D4AF37;
+  
+  --animate-text-reveal: text-reveal 1.5s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@keyframes text-reveal {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+:root {
+  --theme-bg: #0D0D0D;
+  --theme-text: #F3F4F6;
+  --theme-text-muted: #9CA3AF;
+  --theme-accent: #D4AF37;
+  --theme-accent-hover: #F3C63F;
+  --theme-card-bg: #161616;
+  --theme-card-border: rgba(212, 175, 55, 0.2);
+  --theme-blob-1: rgba(212, 175, 55, 0.15);
+  --theme-blob-2: rgba(147, 51, 234, 0.1);
+}
+
+
+/* Remove all blur backgrounds globally, except for the luxury glass navbar and popovers */
+*, ::before, ::after, ::backdrop {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.glass-nav, .backdrop-blur-xl, .backdrop-blur-md, .backdrop-blur-2xl {
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+
+body {
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.5s ease, color 0.5s ease;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Scrollbar customizations */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--theme-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--theme-accent);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-accent-hover);
+}
+
+/* Utility Animations */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Noise overlay texture */
+.bg-grain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999; /* Place above content but below custom cursor */
+  opacity: 0.045; /* Subtle blend */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Thin editorial vertical grid lines */
+.bg-grid-lines {
+  background-image: linear-gradient(to right, rgba(212, 175, 55, 0.02) 1px, transparent 1px);
+  background-size: 12.5% 100%; /* 8 column grid layout */
+}
+
+@keyframes pan-stripes {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 0; }
+}
+
+.animate-pan-stripes {
+  animation: pan-stripes 8s linear infinite;
+}
+
+
+
