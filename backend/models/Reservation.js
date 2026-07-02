@@ -15,6 +15,10 @@ const reservationSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Compound indexes for production query performance
+reservationSchema.index({ date: 1, time: 1, status: 1 });
+reservationSchema.index({ date: 1, time: 1, tableNumber: 1, status: 1 });
+
 const Reservation = mongoose.model('Reservation', reservationSchema);
 
 export default Reservation;

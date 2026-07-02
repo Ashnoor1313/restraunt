@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, Ticket, CheckCircle, Sparkles, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE_URL } from '../config';
 
 const defaultEvents = [
   {
@@ -52,7 +53,7 @@ const EventsPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/events');
+        const res = await fetch(`${API_BASE_URL}/api/events`);
         if (res.ok) {
           const data = await res.json();
           setEvents(data);
@@ -68,7 +69,7 @@ const EventsPage = () => {
     e.preventDefault();
     if (bookingForm.name && bookingForm.email && selectedEvent) {
       try {
-        const res = await fetch('http://localhost:5000/api/events/book', {
+        const res = await fetch(`${API_BASE_URL}/api/events/book`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

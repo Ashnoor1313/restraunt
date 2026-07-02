@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Flame, Sparkles, BookOpen, Coffee, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE_URL } from '../../config';
 
 const defaultMenuItems = [
   {
@@ -160,7 +161,7 @@ const InteractiveMenu = () => {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        let url = 'http://localhost:5000/api/menu';
+        let url = `${API_BASE_URL}/api/menu`;
         const params = [];
         if (activeCategory !== 'All') params.push(`category=${activeCategory}`);
         if (searchQuery) params.push(`search=${searchQuery}`);

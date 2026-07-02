@@ -1,6 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import morgan from 'morgan';
 import connectDB from './config/db.js';
 
 // Route imports
@@ -16,9 +21,39 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares
-app.use(cors());
+// Production ready middleware
+app.use(helmet());
+app.use(compression());
+
+// Logger middleware
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// CORS Configuration
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Global Rate Limiter
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: { message: "Too many requests from this IP, please try again after 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(globalLimiter);
+
+// Booking Rate Limiter (Tighter limit to prevent spam)
+const bookingLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 10, // Limit each IP to 10 booking requests per windowMs
+  message: { message: "Too many bookings attempted from this IP, please try again after 10 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Database connection & Auto-seeding
 connectDB().then(async () => {
@@ -238,7 +273,8 @@ connectDB().then(async () => {
 
 // Routes
 app.use('/api/menu', menuRouter);
-app.use('/api/reservations', reservationRouter);
+app.use('/api/reservations', bookingLimiter, reservationRouter);
+app.post('/api/events/book', bookingLimiter);
 app.use('/api/events', eventsRouter);
 
 app.get('/', (req, res) => {
@@ -252,4 +288,22 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Graceful shutdown handling
+const gracefulShutdown = (signal) => {
+  console.log(`\nReceived ${signal}. Starting graceful shutdown...`);
+  server.close(() => {
+    console.log('HTTP server closed.');
+    mongoose.connection.close().then(() => {
+      console.log('MongoDB connection closed.');
+      process.exit(0);
+    }).catch(err => {
+      console.error('Error closing MongoDB connection:', err);
+      process.exit(1);
+    });
+  });
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

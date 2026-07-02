@@ -22,6 +22,10 @@ const menuItemSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Indexes for production query performance
+menuItemSchema.index({ category: 1 });
+menuItemSchema.index({ tags: 1 });
+
 const MenuItem = mongoose.model('MenuItem', menuItemSchema);
 
 export default MenuItem;

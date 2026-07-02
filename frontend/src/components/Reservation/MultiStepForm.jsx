@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, User, Phone, Mail, Award, CheckCircle, ArrowRight, ArrowLeft, MessageSquare } from 'lucide-react';
 import TableLayout from './TableLayout';
+import { API_BASE_URL } from '../../config';
 
 const timeSlots = [
   '12:30', '13:00', '13:30', '14:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'
@@ -33,7 +34,7 @@ const MultiStepForm = () => {
       if (!formData.date || !formData.time) return;
       setLoadingAvailability(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/reservations/availability?date=${formData.date}&time=${formData.time}`);
+        const res = await fetch(`${API_BASE_URL}/api/reservations/availability?date=${formData.date}&time=${formData.time}`);
         if (res.ok) {
           const data = await res.json();
           setOccupiedTables(data.occupiedTables);
@@ -80,7 +81,7 @@ const MultiStepForm = () => {
     e.preventDefault();
     setErrorMsg('');
     try {
-      const res = await fetch('http://localhost:5000/api/reservations', {
+      const res = await fetch(`${API_BASE_URL}/api/reservations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
