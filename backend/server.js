@@ -58,6 +58,10 @@ const bookingLimiter = rateLimit({
 // Database connection & Auto-seeding
 connectDB().then(async () => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      console.log('Database not connected (Offline/Fallback mode). Skipping auto-seeding.');
+      return;
+    }
     // Auto-seed Menu Items if empty
     const menuCount = await MenuItem.countDocuments({});
     if (menuCount === 0) {
