@@ -6,6 +6,8 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 
 // Route imports
@@ -22,7 +24,18 @@ dotenv.config();
 const app = express();
 
 // Production ready middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://*"],
+      connectSrc: ["'self'", "http://localhost:5000", "https://*"]
+    }
+  }
+}));
 app.use(compression());
 
 // Logger middleware
@@ -280,10 +293,27 @@ app.use('/api/menu', menuRouter);
 app.use('/api/reservations', bookingLimiter, reservationRouter);
 app.post('/api/events/book', bookingLimiter);
 app.use('/api/events', eventsRouter);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.get('/', (req, res) => {
-  res.send('Premium Restaurant API is running.');
-});
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+  const distPath = path.join(__dirname, '../frontend/dist');
+  app.use(express.static(distPath));
+
+  // Catch-all route to serve index.html for SPA routing (React Router)
+  app.get('*', (req, res, next) => {
+    // Ignore API paths
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('Premium Restaurant API is running.');
+  });
+}
 
 // Fallback error handler
 app.use((err, req, res, next) => {
